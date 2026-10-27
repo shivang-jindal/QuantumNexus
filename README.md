@@ -25,6 +25,10 @@ The repository is a complete open-source product:
 - **Shared** — one Zod schema and constant catalogue for runtime and types
 - **Engine** — pure functions, no database required, fully reproducible
 
+## Quantum protocol studies
+
+QuantumNexus supports exploratory quantum-network and protocol planning. Create a named study with a seed and explicit assumptions, run a link or security scenario using that seed, and retain/export its model report. The catalogue and outputs are illustrative simulations; they are not live device measurements, cryptographic security proofs, or deployment advice. Studies are stored in `.data/workspaces.json` (override with `WORKSPACE_FILE`) on the server installation. This file is single-installation storage, not accounts or cloud collaboration.
+
 ---
 
 ## Features

@@ -420,6 +420,7 @@ export const NAV_ITEMS = [
   { to: '/', label: 'Overview', icon: 'overview' },
   { to: '/catalog', label: 'Atlas', icon: 'catalog' },
   { to: '/simulator', label: 'Simulator', icon: 'simulator' },
+  { to: '/workspaces', label: 'Protocol studies', icon: 'projects' },
   { to: '/assistant', label: 'Engineer', icon: 'assistant' },
   { to: '/settings', label: 'Settings', icon: 'settings' }
 ] as const;
