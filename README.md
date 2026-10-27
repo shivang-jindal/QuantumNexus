@@ -1,6 +1,6 @@
 # QuantumNexus
 
-> **Deterministic quantum-network twin — from entangled pair to global key exchange.**
+> **Post-quantum cryptography migration inventory and readiness workbench.**
 
 [![CI](https://github.com/shivang-jindal/QuantumNexus/actions/workflows/ci.yml/badge.svg)](https://github.com/shivang-jindal/QuantumNexus/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -30,6 +30,12 @@ The repository is a complete open-source product:
 QuantumNexus supports exploratory quantum-network and protocol planning. Create a named study with a seed and explicit assumptions, run a link or security scenario using that seed, and retain/export its model report. The catalogue and outputs are illustrative simulations; they are not live device measurements, cryptographic security proofs, or deployment advice. Studies are stored in `.data/workspaces.json` (override with `WORKSPACE_FILE`) on the server installation. This file is single-installation storage, not accounts or cloud collaboration.
 
 ---
+
+## Current implementation and limits
+
+The Cryptographic Inventory records systems, owners, algorithms, protocols, sensitivity, long-lived-data flags, migration status, target standards, and dates in a local workspace. It stores metadata only: never enter keys, secrets, credentials, or private certificate material. The standards references cover NIST FIPS 203 ML-KEM, FIPS 204 ML-DSA, and FIPS 205 SLH-DSA. Inventory completion does not prove compliance, cryptographic safety, or migration readiness. The quantum network catalogue and scenario simulator remain illustrative and are not hardware measurements or security proofs.
+
+Some sections below describe the original product vision and aspirational capabilities. They are not a claim that those functions are implemented. See [SPEC.md](SPEC.md) for the vision and this section for present behavior.
 
 ## Features
 

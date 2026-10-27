@@ -7,7 +7,9 @@ export interface StudyProject {
   id: string; name: string; seed: string; notes: string;
   createdAt: string; updatedAt: string;
   runs: Array<{ id: string; scenario: string; result: unknown; createdAt: string }>;
+  assets: CryptoAsset[];
 }
+export interface CryptoAsset { id: string; system: string; owner: string; algorithm: string; protocol: string; assetType: string; dataSensitivity: string; longLivedData: boolean; migrationStatus: string; targetStandard: string; targetDate: string; notes: string; createdAt: string; updatedAt: string }
 interface StoreFile { version: 1; projects: StudyProject[] }
 const STORE_PATH = process.env.WORKSPACE_FILE ?? fileURLToPath(new URL('../../../.data/workspaces.json', import.meta.url));
 const EMPTY: StoreFile = { version: 1, projects: [] };
@@ -22,7 +24,11 @@ export class WorkspaceStore {
     try {
       const data: unknown = JSON.parse(await readFile(this.path, 'utf8'));
       if (typeof data === 'object' && data !== null && 'version' in data &&
-          (data as StoreFile).version === 1 && Array.isArray((data as StoreFile).projects)) return data as StoreFile;
+          (data as StoreFile).version === 1 && Array.isArray((data as StoreFile).projects)) {
+            const state = data as StoreFile;
+            state.projects = state.projects.map((project) => ({ ...project, assets: project.assets ?? [] }));
+            return state;
+          }
       throw new Error('Workspace file has an unsupported format');
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code === 'ENOENT') return EMPTY;
@@ -46,7 +52,7 @@ export class WorkspaceStore {
     return this.update((state) => {
       if (state.projects.length >= 200) throw Object.assign(new Error('This server has reached its 200-project limit.'), { statusCode: 409, code: 'PROJECT_LIMIT_REACHED' });
       const now = new Date().toISOString();
-      const project = { id: randomUUID(), ...input, createdAt: now, updatedAt: now, runs: [] };
+      const project = { id: randomUUID(), ...input, createdAt: now, updatedAt: now, runs: [], assets: [] };
       state.projects.unshift(project); return project;
     });
   }
@@ -58,6 +64,33 @@ export class WorkspaceStore {
       const now = new Date().toISOString();
       project.runs.unshift({ id: randomUUID(), scenario, result, createdAt: now });
       project.updatedAt = now; return project;
+    });
+  }
+  async addAsset(id: string, input: Omit<CryptoAsset, 'id' | 'createdAt' | 'updatedAt'>): Promise<CryptoAsset> {
+    return this.update((state) => {
+      const project = state.projects.find((item) => item.id === id);
+      if (!project) throw Object.assign(new Error('Project not found'), { statusCode: 404, code: 'PROJECT_NOT_FOUND' });
+      if (project.assets.length >= 2000) throw Object.assign(new Error('This inventory has reached its 2,000-asset limit.'), { statusCode: 409, code: 'ASSET_LIMIT_REACHED' });
+      const now = new Date().toISOString(); const asset: CryptoAsset = { id: randomUUID(), ...input, createdAt: now, updatedAt: now };
+      project.assets.unshift(asset); project.updatedAt = now; return asset;
+    });
+  }
+  async updateAsset(projectId: string, assetId: string, patch: Partial<Omit<CryptoAsset, 'id' | 'createdAt' | 'updatedAt'>>): Promise<CryptoAsset> {
+    return this.update((state) => {
+      const project = state.projects.find((item) => item.id === projectId);
+      if (!project) throw Object.assign(new Error('Project not found'), { statusCode: 404, code: 'PROJECT_NOT_FOUND' });
+      const asset = project.assets.find((item) => item.id === assetId);
+      if (!asset) throw Object.assign(new Error('Inventory item not found'), { statusCode: 404, code: 'ASSET_NOT_FOUND' });
+      Object.assign(asset, patch, { updatedAt: new Date().toISOString() }); project.updatedAt = asset.updatedAt; return asset;
+    });
+  }
+  async removeAsset(projectId: string, assetId: string): Promise<void> {
+    await this.update((state) => {
+      const project = state.projects.find((item) => item.id === projectId);
+      if (!project) throw Object.assign(new Error('Project not found'), { statusCode: 404, code: 'PROJECT_NOT_FOUND' });
+      const index = project.assets.findIndex((item) => item.id === assetId);
+      if (index < 0) throw Object.assign(new Error('Inventory item not found'), { statusCode: 404, code: 'ASSET_NOT_FOUND' });
+      project.assets.splice(index, 1); project.updatedAt = new Date().toISOString();
     });
   }
   async remove(id: string): Promise<void> {

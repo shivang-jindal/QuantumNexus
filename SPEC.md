@@ -1,5 +1,7 @@
 # ⚛️ QUANTUM NEXUS — The Quantum Internet Visualizer
 
+> **Implementation status:** This is an aspirational vision document, not a statement of implemented capability. The current product is a metadata-only cryptographic migration inventory. It references NIST [FIPS 203 (ML-KEM)](https://csrc.nist.gov/pubs/fips/203/final), [FIPS 204 (ML-DSA)](https://csrc.nist.gov/pubs/fips/204/final), and [FIPS 205 (SLH-DSA)](https://csrc.nist.gov/pubs/fips/205/final). The quantum-network catalogue and simulator are illustrative; they are not quantum hardware readings, cryptographic validation, or security proofs. Never store key material in the inventory.
+
 > **The first 3D visualization of the quantum internet. See entanglement distribution, quantum key distribution, quantum repeaters, quantum sensors, quantum randomness. The quantum layer of reality, visualized.**
 
 ---

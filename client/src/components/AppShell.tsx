@@ -8,6 +8,7 @@ import {
   Command,
   FlaskConical,
   FolderKanban,
+  KeyRound,
   Github,
   Globe2,
   LayoutDashboard,
@@ -29,6 +30,7 @@ import { CommandPalette } from './CommandPalette';
 const ICONS = {
   overview: LayoutDashboard,
   catalog: Globe2,
+  inventory: KeyRound,
   simulator: FlaskConical,
   projects: FolderKanban,
   assistant: Sparkles,
@@ -38,6 +40,7 @@ const ICONS = {
 const PATH_TITLES: Record<string, string> = {
   '/': 'Overview',
   '/catalog': PRODUCT.catalogueName,
+  '/inventory': 'Cryptographic inventory',
   '/simulator': 'Simulation lab',
   '/workspaces': 'Protocol studies',
   '/assistant': PRODUCT.assistantNameTitle,
