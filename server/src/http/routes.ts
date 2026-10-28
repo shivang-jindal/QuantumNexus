@@ -11,6 +11,7 @@ import {
 
 import { asyncHandler, validateBody, validateQuery } from './middleware.js';
 import { workspaceStore } from '../store/workspaceStore.js';
+import { fetchNistPqcUpdates } from '../providers/nistPqc.js';
 import {
   analyticsSummary,
   capabilities,
@@ -51,6 +52,10 @@ apiRouter.get('/v1/catalog/:id', (req, res, next) => {
 apiRouter.get('/v1/analytics/summary', (_req, res) => {
   res.json(analyticsSummary());
 });
+
+apiRouter.get('/v1/intelligence/nist-pqc', asyncHandler(async (_req, res) => {
+  res.json(await fetchNistPqcUpdates());
+}));
 
 const projectInput = z.object({
   name: z.string().trim().min(1).max(100),

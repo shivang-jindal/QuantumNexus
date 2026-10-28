@@ -8,6 +8,7 @@ import { ErrorNote, Panel, SectionHeading, Spinner, StatCard } from '../componen
 
 type Asset = { id: string; system: string; owner: string; algorithm: string; protocol: string; assetType: string; dataSensitivity: string; longLivedData: boolean; migrationStatus: string; targetStandard: string; targetDate: string; notes: string; updatedAt: string };
 type Project = { id: string; name: string; seed: string };
+type NistUpdates = { updates: Array<{ title: string; date: string | null; summary: string; url: string }>; fetchedAt: string; source: { name: string; url: string }; note: string };
 const blank = { system: '', owner: '', algorithm: '', protocol: '', assetType: 'TLS certificate', dataSensitivity: 'Confidential', longLivedData: false, migrationStatus: 'Unknown', targetStandard: 'Undecided', targetDate: '', notes: '' };
 const standards = [{ id: 'ML-KEM (FIPS 203)', href: 'https://csrc.nist.gov/pubs/fips/203/final', purpose: 'Key establishment' }, { id: 'ML-DSA (FIPS 204)', href: 'https://csrc.nist.gov/pubs/fips/204/final', purpose: 'Digital signatures' }, { id: 'SLH-DSA (FIPS 205)', href: 'https://csrc.nist.gov/pubs/fips/205/final', purpose: 'Stateless hash-based signatures' }];
 function triageScore(asset: Asset) {
@@ -23,6 +24,7 @@ export function CryptoInventoryPage() {
   const [projectId, setProjectId] = useState(''); const [form, setForm] = useState(blank);
   const client = useQueryClient();
   const projects = useQuery({ queryKey: ['workspaces'], queryFn: () => apiGet<{ projects: Project[] }>('/workspaces') });
+  const nistUpdates = useQuery({ queryKey: ['nist-pqc-updates'], queryFn: () => apiGet<NistUpdates>('/intelligence/nist-pqc'), staleTime: 15 * 60 * 1000, retry: 1 });
   const effectiveId = projectId || projects.data?.projects[0]?.id || '';
   const assets = useQuery({ queryKey: ['crypto-assets', effectiveId], queryFn: () => apiGet<{ assets: Asset[] }>(`/workspaces/${encodeURIComponent(effectiveId)}/assets`), enabled: Boolean(effectiveId) });
   const add = useMutation({ mutationFn: () => apiPost<{ asset: Asset }>(`/workspaces/${encodeURIComponent(effectiveId)}/assets`, form), onSuccess: () => { setForm(blank); void client.invalidateQueries({ queryKey: ['crypto-assets', effectiveId] }); void client.invalidateQueries({ queryKey: ['workspaces'] }); } });
@@ -58,5 +60,10 @@ export function CryptoInventoryPage() {
       </Panel>
     </>}
     <Panel title="NIST post-quantum standards" description="Standards references for migration planning."><div className="grid gap-2 md:grid-cols-3">{standards.map((standard) => <a key={standard.id} className="rounded-lg border border-line p-3 hover:bg-white/5" href={standard.href} target="_blank" rel="noreferrer"><strong className="text-xs text-ink">{standard.id}</strong><p className="mt-1 text-xs text-ink-muted">{standard.purpose} · NIST FIPS</p></a>)}</div><p className="mt-3 text-xs text-ink-faint">Use this as an inventory and planning aid. Cryptographic migration choices require protocol, implementation, interoperability, and risk review. Follow current NIST guidance and vendor support; do not interpret these references as a compliance determination.</p></Panel>
+    <Panel title="NIST PQC publication watch" description="Recent announcements from the official NIST post-quantum cryptography project page." actions={<a className="btn text-xs" href="https://csrc.nist.gov/projects/post-quantum-cryptography/news" target="_blank" rel="noreferrer">Open NIST page <ArrowRight className="h-3.5 w-3.5" /></a>}>
+      {nistUpdates.isPending ? <Spinner label="Loading NIST updates…" /> : null}
+      {nistUpdates.isError ? <ErrorNote message={(nistUpdates.error as Error).message} onRetry={() => void nistUpdates.refetch()} /> : null}
+      {nistUpdates.data ? <><div className="space-y-2">{nistUpdates.data.updates.slice(0, 6).map((item) => <a key={item.url} href={item.url} target="_blank" rel="noreferrer" className="block rounded-xl border border-line bg-surface-sunken/35 p-3 transition hover:border-fuchsia-200/30 hover:bg-white/[.03]"><div className="flex flex-wrap items-center justify-between gap-2"><strong className="text-xs text-ink">{item.title}</strong><span className="font-mono text-[10px] text-fuchsia-100">{item.date ?? 'NIST update'}</span></div>{item.summary ? <p className="mt-1 text-xs leading-relaxed text-ink-muted">{item.summary}</p> : null}</a>)}</div><p className="mt-3 text-[10px] text-ink-faint">Retrieved {new Date(nistUpdates.data.fetchedAt).toLocaleString()} · {nistUpdates.data.note}</p></> : null}
+    </Panel>
   </div>;
 }
